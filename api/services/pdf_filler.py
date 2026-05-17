@@ -47,69 +47,75 @@ def _create_honpyo_overlay(data: ExtractionResult) -> bytes:
     corp = data.corporation
     res = data.resolution
 
-    # 税務署名
-    _draw_text(c, 30, 262, corp.tax_office, 10)
+    # 税務署名（「○○税務署長 殿」の○○部分）
+    _draw_text(c, 48, 211, corp.tax_office, 9)
 
-    # 法人番号
+    # 法人番号（ページ右上の番号欄）
     if corp.corporation_number:
         for i, ch in enumerate(corp.corporation_number):
-            _draw_text(c, 125 + i * 5.5, 248, ch, 9)
+            _draw_text(c, 140 + i * 4.8, 272, ch, 8)
 
-    # 法人名
-    _draw_text(c, 55, 237, corp.name, 10)
-
-    # 納税地
+    # 納税地（「納税地」ラベルの右、記入欄）
     postal = f"〒{corp.postal_code}" if corp.postal_code else ""
-    _draw_text(c, 55, 228, f"{postal} {corp.address}", 8)
+    _draw_text(c, 100, 257, f"{postal} {corp.address}", 8)
 
-    # 電話番号
+    # 電話番号（電話欄）
     if corp.phone:
-        _draw_text(c, 150, 228, corp.phone, 8)
+        _draw_text(c, 135, 253, corp.phone, 8)
 
-    # 代表者氏名
+    # 法人名（「法人名」ラベルの右）
+    _draw_text(c, 100, 241, corp.name, 9)
+
+    # 法人名フリガナ
+    if corp.name:
+        _draw_text(c, 105, 248, "", 7)
+
+    # 代表者名（「代表者氏名」ラベルの右）
     if corp.representative:
-        _draw_text(c, 55, 218, corp.representative, 9)
+        _draw_text(c, 100, 218, corp.representative, 9)
 
-    # 事業年度
-    if corp.fiscal_year_start:
-        _draw_text(c, 55, 207, f"{_format_date_wareki(corp.fiscal_year_start)} ～ {_format_date_wareki(corp.fiscal_year_end)}", 8)
+    # 代表者住所
+    if corp.representative:
+        _draw_text(c, 100, 207, "", 8)
 
-    # 資本金
-    if corp.capital:
-        _draw_text(c, 150, 207, f"{_format_amount(corp.capital)}円", 8)
+    # 提出日（左上「令和＿年＿月＿日」）
+    from datetime import date as _date
+    today = _date.today()
+    _draw_text(c, 33, 240, str(today.year - 2018), 9)
+    _draw_text(c, 45, 240, str(today.month), 9)
+    _draw_text(c, 55, 240, str(today.day), 9)
 
-    # ① 決議をした日
-    _draw_text(c, 55, 185, _format_date_wareki(res.decision_date), 8)
+    # ① 決議をした日（「決議をした日」欄の年月日記入位置）
+    d = res.decision_date
+    _draw_text(c, 113, 183, str(d.year - 2018), 8)
+    _draw_text(c, 123, 183, str(d.month), 8)
+    _draw_text(c, 133, 183, str(d.day), 8)
 
     # ① 決議をした機関
-    _draw_text(c, 130, 185, res.decision_body, 8)
+    _draw_text(c, 95, 178, res.decision_body, 8)
 
     # ② 職務執行開始日
-    _draw_text(c, 55, 175, _format_date_wareki(res.execution_start_date), 8)
+    d2 = res.execution_start_date
+    _draw_text(c, 113, 168, str(d2.year - 2018), 8)
+    _draw_text(c, 123, 168, str(d2.month), 8)
+    _draw_text(c, 133, 168, str(d2.day), 8)
 
-    # ③ 当該事業年度開始の日
+    # ③ 臨時改定事由（概要）- 通常は空
     if res.fiscal_year_basis:
-        _draw_text(c, 55, 165, _format_date_wareki(res.fiscal_year_basis), 8)
+        d3 = res.fiscal_year_basis
+        _draw_text(c, 113, 137, str(d3.year - 2018), 8)
+        _draw_text(c, 123, 137, str(d3.month), 8)
+        _draw_text(c, 133, 137, str(d3.day), 8)
 
-    # 届出期限区分
-    basis = res.filing_deadline_basis or "イ"
-    _draw_text(c, 150, 165, basis, 9)
-
-    # ④ 役員概要
-    y_start = 140
-    for i, officer in enumerate(data.officers):
-        y = y_start - i * 8
-        _draw_text(c, 20, y, officer.name, 7)
-        _draw_text(c, 55, y, officer.position, 7)
-        for j, payment in enumerate(officer.payments):
-            _draw_text(c, 90, y - j * 5, _format_date_wareki(payment.payment_date), 7)
-            _draw_text(c, 140, y - j * 5, f"{_format_amount(payment.amount)}円", 7)
-        if officer.regular_payment:
-            _draw_text(c, 170, y, f"月額{_format_amount(officer.regular_payment)}円", 7)
+    # ④ 付表No
+    n_officers = len(data.officers)
+    _draw_text(c, 100, 132, f"1 ～ No. {n_officers}", 8)
 
     # ⑤ 定期同額給与としない理由
     if res.reason_for_bonus_timing:
-        _draw_text(c, 20, 95, res.reason_for_bonus_timing, 7)
+        _draw_text(c, 25, 108, res.reason_for_bonus_timing[:40], 7)
+        if len(res.reason_for_bonus_timing) > 40:
+            _draw_text(c, 25, 104, res.reason_for_bonus_timing[40:80], 7)
 
     c.showPage()
     c.save()
@@ -117,47 +123,52 @@ def _create_honpyo_overlay(data: ExtractionResult) -> bytes:
 
 
 def _create_futahyo_overlay(data: ExtractionResult) -> bytes:
-    """付表1 PDF のオーバーレイを作成"""
+    """付表1 PDF のオーバーレイを作成（1役員1ページ）"""
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
 
-    # 法人名
-    _draw_text(c, 55, 262, data.corporation.name, 9)
-
-    y_start = 235
     for idx, officer in enumerate(data.officers):
-        y = y_start - idx * 60
-
-        if y < 40:
+        if idx > 0:
             c.showPage()
-            _draw_text(c, 55, 275, data.corporation.name, 9)
-            y = 250
 
-        # 氏名
-        _draw_text(c, 20, y, officer.name, 8)
-        # 役職
-        _draw_text(c, 65, y, officer.position, 8)
-        # フリガナ
-        if officer.name_kana:
-            _draw_text(c, 20, y + 5, officer.name_kana, 6)
-        # 就任年月日
-        if officer.appointment_date:
-            _draw_text(c, 110, y, _format_date_wareki(officer.appointment_date), 7)
-        # 区分
-        _draw_text(c, 160, y, officer.category or "事前確定届出給与", 6)
+        # No.（右上）
+        _draw_text(c, 130, 277, str(idx + 1), 9)
 
-        # 支給明細
+        # 対象者の氏名（役職）
+        _draw_text(c, 60, 270, f"{officer.name}（{officer.position}）", 9)
+
+        # 職務執行開始日
+        d = data.resolution.execution_start_date
+        _draw_text(c, 125, 263, str(d.year - 2018), 8)
+        _draw_text(c, 140, 263, str(d.month), 8)
+        _draw_text(c, 152, 263, str(d.day), 8)
+
+        # 事業年度
+        if data.corporation.fiscal_year_start:
+            fy = data.corporation.fiscal_year_start
+            _draw_text(c, 100, 252, str(fy.year - 2018), 8)
+            _draw_text(c, 112, 252, str(fy.month), 8)
+            _draw_text(c, 122, 252, str(fy.day), 8)
+        if data.corporation.fiscal_year_end:
+            fe = data.corporation.fiscal_year_end
+            _draw_text(c, 148, 252, str(fe.year - 2018), 8)
+            _draw_text(c, 160, 252, str(fe.month), 8)
+            _draw_text(c, 170, 252, str(fe.day), 8)
+
+        # 届出額の表（各支給回）
+        # 表のヘッダー位置: y≈238mm, 各行は約9mm間隔
+        row_y_start = 230
         for j, payment in enumerate(officer.payments):
-            py = y - 12 - j * 8
-            _draw_text(c, 30, py, _format_date_wareki(payment.payment_date), 7)
-            _draw_text(c, 85, py, f"{_format_amount(payment.amount)}円", 7)
-            if payment.memo:
-                _draw_text(c, 130, py, payment.memo, 6)
-
-        # 定期同額給与
-        if officer.regular_payment:
-            ry = y - 12 - len(officer.payments) * 8 - 5
-            _draw_text(c, 30, ry, f"定期同額給与（月額）: {_format_amount(officer.regular_payment)}円", 7)
+            ry = row_y_start - j * 9.5
+            # 支給時期（年月日）
+            pd = payment.payment_date
+            _draw_text(c, 40, ry, str(pd.year - 2018), 7)
+            _draw_text(c, 50, ry, str(pd.month), 7)
+            _draw_text(c, 58, ry, str(pd.day), 7)
+            # 届出額
+            _draw_text(c, 75, ry, _format_amount(payment.amount), 8)
+            # 届出額（右側も同額）
+            _draw_text(c, 155, ry, _format_amount(payment.amount), 8)
 
     c.showPage()
     c.save()
