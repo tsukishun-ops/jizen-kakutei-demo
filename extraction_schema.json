@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "事前確定届出給与に関する届出書 抽出スキーマ",
+  "description": "決議メモから Claude API が抽出する構造化データ。国税庁様式 C1-23 の入力項目に対応。",
+  "type": "object",
+  "required": ["corporation", "resolution", "officers"],
+  "properties": {
+    "corporation": {
+      "type": "object",
+      "description": "法人基本情報（本表の上部）",
+      "required": ["name", "address", "tax_office"],
+      "properties": {
+        "name": { "type": "string", "description": "法人名" },
+        "corporation_number": { "type": "string", "description": "法人番号 (13桁)" },
+        "postal_code": { "type": "string", "description": "郵便番号" },
+        "address": { "type": "string", "description": "納税地" },
+        "phone": { "type": "string", "description": "電話番号" },
+        "representative": { "type": "string", "description": "代表者氏名" },
+        "fiscal_year_start": { "type": "string", "format": "date", "description": "事業年度開始日" },
+        "fiscal_year_end": { "type": "string", "format": "date", "description": "事業年度終了日" },
+        "capital": { "type": "integer", "description": "資本金（円）" },
+        "tax_office": { "type": "string", "description": "所轄税務署名" }
+      }
+    },
+    "resolution": {
+      "type": "object",
+      "description": "株主総会等の決議情報（本表 ①〜③）",
+      "required": ["decision_date", "decision_body", "execution_start_date"],
+      "properties": {
+        "decision_date": {
+          "type": "string",
+          "format": "date",
+          "description": "① 決議をした日"
+        },
+        "decision_body": {
+          "type": "string",
+          "enum": ["定時株主総会", "臨時株主総会", "取締役会", "報酬委員会", "社員総会", "その他"],
+          "description": "① 決議をした機関等"
+        },
+        "execution_start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "② 職務の執行を開始する日"
+        },
+        "fiscal_year_basis": {
+          "type": "string",
+          "format": "date",
+          "description": "③ 当該事業年度開始の日"
+        },
+        "filing_deadline_basis": {
+          "type": "string",
+          "enum": ["イ", "ロ", "ハ"],
+          "description": "届出期限の根拠区分（イ=通常、ロ=新設、ハ=臨時改定）"
+        },
+        "reason_for_bonus_timing": {
+          "type": "string",
+          "description": "⑤ 定期同額給与としない理由および支給時期を当該時期とした理由"
+        },
+        "remarks": {
+          "type": "string",
+          "description": "⑥ その他参考となるべき事項"
+        }
+      }
+    },
+    "officers": {
+      "type": "array",
+      "description": "④ 事前確定届出給与等の状況（付表1の対象者ごとの明細）",
+      "items": {
+        "type": "object",
+        "required": ["name", "position", "payments"],
+        "properties": {
+          "name": { "type": "string", "description": "氏名" },
+          "name_kana": { "type": "string", "description": "氏名フリガナ" },
+          "position": { "type": "string", "description": "役職名" },
+          "appointment_date": {
+            "type": "string",
+            "format": "date",
+            "description": "就任年月日"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["事前確定届出給与", "事前確定届出給与以外の給与", "業績連動給与"],
+            "description": "区分"
+          },
+          "payments": {
+            "type": "array",
+            "description": "支給予定（複数回ある場合は複数要素）",
+            "items": {
+              "type": "object",
+              "required": ["payment_date", "amount"],
+              "properties": {
+                "payment_date": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "支給時期"
+                },
+                "amount": {
+                  "type": "integer",
+                  "description": "支給額（円）"
+                },
+                "memo": {
+                  "type": "string",
+                  "description": "備考（夏季賞与、冬季賞与など）"
+                }
+              }
+            }
+          },
+          "regular_payment": {
+            "type": "integer",
+            "description": "定期同額給与の月額（参考情報、付表には記載しない）"
+          }
+        }
+      }
+    }
+  }
+}
