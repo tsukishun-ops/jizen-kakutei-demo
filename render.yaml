@@ -3,7 +3,7 @@ services:
     name: jizen-kakutei-api
     runtime: docker
     dockerfilePath: ./api/Dockerfile
-    dockerContext: ./api
+    dockerContext: ./
     region: oregon
     plan: free
     envVars:

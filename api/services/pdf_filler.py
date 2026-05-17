@@ -16,7 +16,9 @@ pdfmetrics.registerFont(UnicodeCIDFont("HeiseiKakuGo-W5"))
 FONT_NAME = "HeiseiKakuGo-W5"
 PAGE_W, PAGE_H = A4
 
-SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "samples")
+_LOCAL_SAMPLES = os.path.join(os.path.dirname(__file__), "..", "..", "samples")
+_DOCKER_SAMPLES = os.path.join(os.path.dirname(__file__), "..", "samples")
+SAMPLES_DIR = _LOCAL_SAMPLES if os.path.isdir(_LOCAL_SAMPLES) else _DOCKER_SAMPLES
 
 
 def _format_date_wareki(d: date | None) -> str:
