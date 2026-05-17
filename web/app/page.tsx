@@ -39,7 +39,7 @@ export default function Home() {
     toast.success("帳票の生成準備が完了しました");
   };
 
-  const handleDownload = async (type: "xlsx" | "pdf") => {
+  const handleDownload = async (type: "xlsx" | "pdf" | "csv") => {
     if (!extractionData) return;
     setLoading(true);
     try {

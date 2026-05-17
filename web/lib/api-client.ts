@@ -41,7 +41,7 @@ export async function extractData(
 }
 
 export async function downloadFile(
-  type: "xlsx" | "pdf",
+  type: "xlsx" | "pdf" | "csv",
   data: ExtractionResult
 ): Promise<Blob> {
   const res = await fetch(`${API_BASE}/api/generate/${type}`, {

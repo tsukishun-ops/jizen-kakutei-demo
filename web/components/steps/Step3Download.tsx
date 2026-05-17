@@ -1,13 +1,13 @@
 "use client";
 
-import { Download, FileSpreadsheet, FileText, RotateCcw } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, Table2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExtractionResult } from "@/lib/types";
 
 interface Props {
   data: ExtractionResult;
-  onDownload: (type: "xlsx" | "pdf") => void;
+  onDownload: (type: "xlsx" | "pdf" | "csv") => void;
   onReset: () => void;
   loading: boolean;
 }
@@ -24,7 +24,7 @@ export default function Step3Download({ data, onDownload, onReset, loading }: Pr
             「{data.corporation.name}」の事前確定届出給与に関する届出書が生成されました。
             以下からダウンロードしてください。
           </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card className="border-2 hover:border-blue-300 transition-colors">
               <CardContent className="flex flex-col items-center gap-3 p-6">
                 <FileSpreadsheet className="h-12 w-12 text-green-600" />
@@ -39,6 +39,23 @@ export default function Step3Download({ data, onDownload, onReset, loading }: Pr
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Excel をダウンロード
+                </Button>
+              </CardContent>
+            </Card>
+            <Card className="border-2 hover:border-blue-300 transition-colors">
+              <CardContent className="flex flex-col items-center gap-3 p-6">
+                <Table2 className="h-12 w-12 text-blue-600" />
+                <h3 className="font-bold">CSV ファイル</h3>
+                <p className="text-center text-sm text-gray-500">
+                  Excel Online / Google Sheets で開ける
+                </p>
+                <Button
+                  onClick={() => onDownload("csv")}
+                  disabled={loading}
+                  className="mt-2 w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  CSV をダウンロード
                 </Button>
               </CardContent>
             </Card>
