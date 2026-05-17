@@ -52,33 +52,28 @@ async def generate_csv(data: ExtractionResult):
     buf = io.StringIO()
     writer = csv.writer(buf)
 
-    writer.writerow(["事前確定届出給与に関する届出書"])
-    writer.writerow([])
-    writer.writerow(["法人名", data.corporation.name])
-    writer.writerow(["法人番号", data.corporation.corporation_number or ""])
-    writer.writerow(["納税地", data.corporation.address])
-    writer.writerow(["電話番号", data.corporation.phone or ""])
-    writer.writerow(["代表者", data.corporation.representative or ""])
-    writer.writerow(["所轄税務署", data.corporation.tax_office])
-    writer.writerow(["事業年度開始", str(data.corporation.fiscal_year_start or "")])
-    writer.writerow(["事業年度終了", str(data.corporation.fiscal_year_end or "")])
-    writer.writerow(["資本金", data.corporation.capital or ""])
-    writer.writerow([])
-    writer.writerow(["決議日", str(data.resolution.decision_date)])
-    writer.writerow(["決議機関", data.resolution.decision_body])
-    writer.writerow(["職務執行開始日", str(data.resolution.execution_start_date)])
-    writer.writerow(["届出期限区分", data.resolution.filing_deadline_basis or "イ"])
-    writer.writerow(["理由", data.resolution.reason_for_bonus_timing or ""])
-    writer.writerow([])
-    writer.writerow(["氏名", "役職", "支給日", "支給額（円）", "定期同額給与月額（円）"])
+    writer.writerow([
+        "法人名", "法人番号", "納税地", "電話番号", "代表者", "所轄税務署",
+        "決議日", "決議機関", "届出���限区分",
+        "氏名", "役職", "支給日", "支給額", "定期同額給与月額",
+    ])
     for officer in data.officers:
         for j, payment in enumerate(officer.payments):
             writer.writerow([
-                officer.name if j == 0 else "",
-                officer.position if j == 0 else "",
+                data.corporation.name if j == 0 else "",
+                data.corporation.corporation_number or "" if j == 0 else "",
+                data.corporation.address if j == 0 else "",
+                data.corporation.phone or "" if j == 0 else "",
+                data.corporation.representative or "" if j == 0 else "",
+                data.corporation.tax_office if j == 0 else "",
+                str(data.resolution.decision_date) if j == 0 else "",
+                data.resolution.decision_body if j == 0 else "",
+                data.resolution.filing_deadline_basis or "イ" if j == 0 else "",
+                officer.name,
+                officer.position,
                 str(payment.payment_date),
                 payment.amount,
-                officer.regular_payment if j == 0 else "",
+                officer.regular_payment or "",
             ])
 
     csv_content = "\ufeff" + buf.getvalue()
