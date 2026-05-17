@@ -50,8 +50,11 @@ export async function downloadFile(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "帳票生成に失敗しました" }));
-    throw new Error(err.detail || "帳票生成に失敗しました");
+    const text = await res.text();
+    let detail = "帳票生成に失敗しました";
+    try { detail = JSON.parse(text).detail || detail; } catch {}
+    throw new Error(detail);
   }
-  return res.blob();
+  const arrayBuffer = await res.arrayBuffer();
+  return new Blob([arrayBuffer]);
 }

@@ -43,8 +43,14 @@ export default function Home() {
     if (!extractionData) return;
     setLoading(true);
     try {
+      const mimeTypes: Record<string, string> = {
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        pdf: "application/pdf",
+        csv: "text/csv",
+      };
       const blob = await downloadFile(type, extractionData);
-      const url = URL.createObjectURL(blob);
+      const typedBlob = new Blob([blob], { type: mimeTypes[type] });
+      const url = URL.createObjectURL(typedBlob);
       const a = document.createElement("a");
       const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       a.href = url;
